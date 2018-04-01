@@ -26,6 +26,9 @@
 
 cmake_minimum_required(VERSION 3.0.0)
 cmake_policy(SET CMP0028 NEW)
+if (POLICY CMP0071)
+    cmake_policy(SET CMP0071 NEW)
+endif()
 
 project(boomaga)
 
@@ -58,6 +61,8 @@ endif(CUPS_CONFIG_EXECUTABLE)
 # Linux ***************************************
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
+  set(BACKEND_TYPE DBUS)
+  add_definitions(-DBACKEND_TYPE_DBUS=1)
   set(DEF_CUPS_PPD_DIR /usr/share/ppd/boomaga)
   set(DEF_DBUS_MACINE_ID_DIR /var/lib/dbus)
   set(DEF_DBUS_SERVICE_DIR ${CMAKE_INSTALL_PREFIX}/share/dbus-1/services)
@@ -65,11 +70,18 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 # FreeBSD *************************************
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
 
+  set(BACKEND_TYPE DBUS)
+  add_definitions(-DBACKEND_TYPE_DBUS=1)
   set(DEF_CUPS_PPD_DIR /usr/local/share/cups/model)
   set(DEF_DBUS_MACINE_ID_DIR /var/db/dbus)
   set(DEF_DBUS_SERVICE_DIR ${CMAKE_INSTALL_PREFIX}/share/dbus-1/services)
 
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+  
+  set(BACKEND_TYPE MACOS)
+  add_definitions(-DBACKEND_TYPE_MACOS=1)
 endif()
+
 
 set(GUI_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 add_definitions(-DGUI_DIR=\"${GUI_DIR}\")
@@ -94,9 +106,10 @@ setByDefault(GUI_SHARE_DIR  ${CMAKE_INSTALL_PREFIX}/share/${INSTANCE_NAME})
 setByDefault(CUPS_BACKEND_DIR   "${DEF_CUPS_BACKEND_DIR}")
 setByDefault(CUPS_FILTER_DIR    "${DEF_CUPS_FILTER_DIR}")
 setByDefault(CUPS_PPD_DIR       "${DEF_CUPS_PPD_DIR}")
-setByDefault(DBUS_MACINE_ID_DIR "${DEF_DBUS_MACINE_ID_DIR}")
-setByDefault(DBUS_SERVICE_DIR   "${DEF_DBUS_SERVICE_DIR}")
-
+if (BACKEND_TYPE STREQUAL "DBUS")
+  setByDefault(DBUS_MACINE_ID_DIR "${DEF_DBUS_MACINE_ID_DIR}")
+  setByDefault(DBUS_SERVICE_DIR   "${DEF_DBUS_SERVICE_DIR}")
+endif()
 
 status_message(" ")
 status_message("You can change the following directories using cmake options like:")
@@ -105,8 +118,10 @@ status_message(" ")
 status_message("  CUPS_BACKEND_DIR     =  ${CUPS_BACKEND_DIR}")
 status_message("  CUPS_FILTER_DIR      =  ${CUPS_FILTER_DIR}")
 status_message("  CUPS_PPD_DIR         =  ${CUPS_PPD_DIR}")
-status_message("  DBUS_MACINE_ID_DIR   =  ${DBUS_MACINE_ID_DIR}")
-status_message("  DBUS_SERVICE_DIR     =  ${DBUS_SERVICE_DIR}")
+if (BACKEND_TYPE STREQUAL "DBUS")
+  status_message("  DBUS_MACINE_ID_DIR   =  ${DBUS_MACINE_ID_DIR}")
+  status_message("  DBUS_SERVICE_DIR     =  ${DBUS_SERVICE_DIR}")
+endif()
 status_message(" ")
 status_message(" You can change the following options using cmake options:")
 status_message("  INSTANCE_NAME        =  ${INSTANCE_NAME}")

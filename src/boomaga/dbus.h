@@ -27,6 +27,7 @@
 #ifndef DBUS_H
 #define DBUS_H
 
+#ifdef BACKEND_TYPE_DBUS
 #include <QApplication>
 
 class BoomagaDbus: public QObject
@@ -45,4 +46,5 @@ private slots:
 };
 
 
+#endif
 #endif // DBUS_H

@@ -23,6 +23,6 @@
  #
  # END_COMMON_COPYRIGHT_HEADER
 
-
-add_subdirectory(dbus)
-
+if (BACKEND_TYPE STREQUAL "DBUS")
+	add_subdirectory(dbus)
+endif()

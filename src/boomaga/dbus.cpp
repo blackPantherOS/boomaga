@@ -23,7 +23,7 @@
  *
  * END_COMMON_COPYRIGHT_HEADER */
 
-
+#ifdef BACKEND_TYPE_DBUS
 #include "dbus.h"
 #include "kernel/project.h"
 
@@ -82,3 +82,5 @@ void BoomagaDbus::doAdd(const QString &file, const QString &title, bool autoRemo
         job.setAutoRemove(autoRemove);
     }
 }
+
+#endif

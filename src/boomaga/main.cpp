@@ -33,7 +33,6 @@
 #include <QTextStream>
 #include <QLocale>
 #include <QTranslator>
-#include <QDBusConnection>
 #include <QFileInfo>
 #include <QLibraryInfo>
 #include <QDebug>
@@ -192,8 +191,10 @@ int main(int argc, char *argv[])
         //*************************************************
         files << args.at(i);
     }
-
+#ifdef BACKEND_TYPE_DBUS
     BoomagaDbus dbus("org.boomaga", "/boomaga");
+#endif
+
 
     MainWindow mainWindow;
     mainWindow.show();
