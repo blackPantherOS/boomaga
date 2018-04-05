@@ -205,6 +205,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/org.boomaga.service
 
 include(cmake/CreateDesktopFile.cmake)
 CREATE_DESKTOP_FILE(misc/boomaga.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/boomaga.desktop translations/*.desktop)
+CREATE_PLIST_FILE(misc/Info.plist.in ${CMAKE_CURRENT_BINARY_DIR}/Info.plist)
 
 if (BACKEND_TYPE STREQUAL "DBUS")
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.boomaga.service DESTINATION ${DBUS_SERVICE_DIR})

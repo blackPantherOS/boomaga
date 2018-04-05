@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleExecutable</key>
+	<string>boomaga</string>
+
+	<key>CFBundleIconFile</key> 	
+	<string>Boomaga</string>
+
+	<key>CFBundleIdentifier</key>
+	<string>io.github.Boomaga</string>
+
+	<key>CFBundleShortVersionString</key>
+	<string>@FULL_VERSION@</string>
+
+	<key>CFBundleVersion</key>
+	<string>@FULL_VERSION@</string>
+
+	<key>NSHumanReadableCopyright</key>
+	<string>LGPL v2+</string>
+
+	<key>LSHasLocalizedDisplayName</key>
+	<true/>
+
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+
+	
+	<key>CFBundleSignature</key>
+	<string>????</string>
+
+</dict>
+</plist>
