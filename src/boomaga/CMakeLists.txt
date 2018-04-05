@@ -39,6 +39,7 @@ set(HEADERS
     dbus.h
     render.h
     settings.h
+    application.h
 
     kernel/sheet.h
     kernel/inputfile.h
@@ -50,7 +51,7 @@ set(HEADERS
     kernel/projectpage.h
     kernel/printer.h
     kernel/cupsprinteroptions.h
-        
+
     gui/mainwindow.h
     gui/actions.h
     gui/icon.h
@@ -65,11 +66,11 @@ set(HEADERS
     gui/widgets/printerscombobox.h
     gui/widgets/previewwidget.h
     gui/widgets/subbookletview.h
-    
+
     translations/translatorsinfo/translatorsinfo.h
 
     pdfmerger/pdfmergeripc.h
-    
+
     pdfparser/pdferrors.h
     pdfparser/pdfxref.h
     pdfparser/pdfvalue.h
@@ -83,6 +84,7 @@ set(SOURCES
     dbus.cpp
     render.cpp
     settings.cpp
+    application.cpp
 
     kernel/sheet.cpp
     kernel/inputfile.cpp
@@ -94,7 +96,7 @@ set(SOURCES
     kernel/cupsprinteroptions.cpp
     kernel/printer.cpp
     kernel/projectfile.cpp
-    
+
     gui/mainwindow.cpp
     gui/actions.cpp
     gui/icon.cpp
@@ -109,11 +111,11 @@ set(SOURCES
     gui/widgets/printerscombobox.cpp
     gui/widgets/previewwidget.cpp
     gui/widgets/subbookletview.cpp
-    
+
     translations/translatorsinfo/translatorsinfo.cpp
 
     pdfmerger/pdfmergeripc.cpp
-    
+
     pdfparser/pdfxref.cpp
     pdfparser/pdfvalue.cpp
     pdfparser/pdfreader.cpp
@@ -213,7 +215,7 @@ endif()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux"    OR 
     ${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD" )
-    
+
     install(FILES   misc/images/mainicon/boomaga-16x16.png   DESTINATION "share/icons/hicolor/16x16/apps"   RENAME "boomaga.png")
     install(FILES   misc/images/mainicon/boomaga-32x32.png   DESTINATION "share/icons/hicolor/32x32/apps"   RENAME "boomaga.png")
     install(FILES   misc/images/mainicon/boomaga-48x48.png   DESTINATION "share/icons/hicolor/48x48/apps"   RENAME "boomaga.png")

@@ -28,8 +28,8 @@
 #include "gui/mainwindow.h"
 #include "dbus.h"
 #include "kernel/job.h"
+#include "application.h"
 
-#include <QApplication>
 #include <QTextStream>
 #include <QLocale>
 #include <QTranslator>
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 {
     readEnvFile();
 
-    QApplication application(argc, argv);
+    Application application(argc, argv);
 
     QTranslator qtTranslator;
     qtTranslator.load("qt_" + QLocale::system().name(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
@@ -208,6 +208,9 @@ int main(int argc, char *argv[])
 
         jobs[i].setAutoRemove(autoRemove);
     }
+
+    QObject::connect(&application, &Application::openFile,
+                    [](const QString file){ project->load(file); });
 
     return application.exec();
 }
