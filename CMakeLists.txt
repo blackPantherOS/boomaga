@@ -80,6 +80,9 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
   
   set(BACKEND_TYPE MACOS)
   add_definitions(-DBACKEND_TYPE_MACOS=1)
+
+  set(MAC_APP_ID    "io.github.Boomaga")
+  set(MAC_SPOOL_DIR "/var/spool/${MAC_APP_ID}")
 endif()
 
 

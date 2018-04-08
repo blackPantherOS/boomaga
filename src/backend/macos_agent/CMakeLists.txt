@@ -2,7 +2,7 @@
  # (c)LGPL2+
  #
  #
- # Copyright: 2012-2013 Boomaga team https://github.com/Boomaga
+ # Copyright: 2012-2018 Boomaga team https://github.com/Boomaga
  # Authors:
  #   Alexander Sokoloff <sokoloff.a@gmail.com>
  #
@@ -23,10 +23,39 @@
  #
  # END_COMMON_COPYRIGHT_HEADER
 
-if (BACKEND_TYPE STREQUAL "DBUS")
-	add_subdirectory(dbus)
+cmake_minimum_required(VERSION 3.0.0)
+cmake_policy(SET CMP0028 NEW)
 
-elseif (BACKEND_TYPE STREQUAL "MACOS")
-	add_subdirectory(macos_agent)
+project(agent C)
 
+set(HEADERS
+  tools.h
+  logging.h
+)
+
+set(SOURCES
+  main.cpp
+  tools.cpp
+  logging.cpp
+)
+
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU"   OR
+   CMAKE_C_COMPILER_ID   STREQUAL "GNU"   OR 
+   CMAKE_CXX_COMPILER_ID STREQUAL "Clang" OR
+   CMAKE_C_COMPILER_ID   STREQUAL "Clang" )
+
+  add_definitions (-Wall -pedantic)
 endif()
+
+include_directories(
+  ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_SOURCE_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+
+add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES})
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "agent")
+
+configure_file(plist.in ${CMAKE_CURRENT_BINARY_DIR}/${MAC_APP_ID}.agent.plist @ONLY)
