@@ -194,12 +194,11 @@ qt5_add_resources(  QRC_SOURCES ${RESOURCES})
 qt5_add_translation(QM_FILES    ${TS_FILES})
 
 
-add_executable(${INSTANCE_NAME} ${HEADERS} ${SOURCES} ${QM_FILES} ${QRC_SOURCES} ${TRANSLATORS_INFO_QRC})
-target_link_libraries(${INSTANCE_NAME} ${LIBRARIES} Qt5::Widgets Qt5::PrintSupport )
+add_executable(boomaga ${HEADERS} ${SOURCES} ${QM_FILES} ${QRC_SOURCES} ${TRANSLATORS_INFO_QRC})
+target_link_libraries(boomaga ${LIBRARIES} Qt5::Widgets Qt5::PrintSupport )
 
 
-install(TARGETS ${INSTANCE_NAME} RUNTIME DESTINATION ${GUI_DIR})
-install(FILES ${QM_FILES} DESTINATION ${TRANSLATIONS_DIR})
+
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/org.boomaga.service
                ${CMAKE_CURRENT_BINARY_DIR}/org.boomaga.service
@@ -216,6 +215,9 @@ endif()
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux"    OR 
     ${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD" )
 
+    install(TARGETS boomaga RUNTIME DESTINATION ${GUI_DIR})
+    install(FILES ${QM_FILES} DESTINATION ${TRANSLATIONS_DIR})
+
     install(FILES   misc/images/mainicon/boomaga-16x16.png   DESTINATION "share/icons/hicolor/16x16/apps"   RENAME "boomaga.png")
     install(FILES   misc/images/mainicon/boomaga-32x32.png   DESTINATION "share/icons/hicolor/32x32/apps"   RENAME "boomaga.png")
     install(FILES   misc/images/mainicon/boomaga-48x48.png   DESTINATION "share/icons/hicolor/48x48/apps"   RENAME "boomaga.png")
@@ -226,9 +228,19 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux"    OR
 
     install(FILES   ${CMAKE_CURRENT_BINARY_DIR}/boomaga.desktop DESTINATION "share/applications")
     install(FILES   misc/boomaga.xml        DESTINATION "share/mime/packages")
+
+    install(FILES   misc/boomaga.1.gz       DESTINATION share/man/man1)
+
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    install(TARGETS boomaga   RUNTIME DESTINATION Applications/Boomaga.app/Contents/MacOS)
+    install(FILES ${QM_FILES}         DESTINATION Applications/Boomaga.app/Contents/Resources)
+
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION Applications/Boomaga.app/Contents)
+    install(FILES misc/images/mainicon/Boomaga.icns      DESTINATION Applications/Boomaga.app/Contents/Resources)
+    install(FILES misc/boomaga.1.gz                      DESTINATION Applications/Boomaga.app/Contents/Resources)
 endif()
 
-install(FILES   misc/boomaga.1.gz       DESTINATION share/man/man1)
+
 
 add_subdirectory(pdfmerger)
 
