@@ -159,9 +159,8 @@ public:
     void setFlipType(FlipType value) { mCurrentProfile->setFlipType(value);}
 
     bool canChangeDuplexType() const { return mCanChangeDuplexType; }
-    bool isShowProgressDialog() const { return mShowProgressDialog; }
 
-    virtual bool print(const QList<Sheet*> &sheets, const QString &jobName, bool duplex, int numCopies, bool collate) const;
+    virtual bool print(const QList<Sheet*> &sheets, const QString &jobName, bool doubleSided, int numCopies, bool collate) const;
 
     QString deviceUri() const { return mDeviceUri; }
 
@@ -174,7 +173,6 @@ public:
 
 protected:
     bool mCanChangeDuplexType;
-    bool mShowProgressDialog;
 
 private:
     const QString mPrinterName;

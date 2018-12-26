@@ -27,7 +27,6 @@
 #ifndef DBUS_H
 #define DBUS_H
 
-#ifdef BACKEND_TYPE_DBUS
 #include <QApplication>
 
 class BoomagaDbus: public QObject
@@ -38,6 +37,8 @@ public:
     BoomagaDbus(const QString &serviceName, const QString &dbusPath);
     ~BoomagaDbus();
 
+    static bool runBoomaga(const QString &file, const QString &title,bool autoRemove = false, const QString &options = "", uint count = 1);
+
 public slots:
     void add(const QString &file, const QString &title,bool autoRemove = false, const QString &options = "", uint count = 1);
 
@@ -46,5 +47,4 @@ private slots:
 };
 
 
-#endif
 #endif // DBUS_H

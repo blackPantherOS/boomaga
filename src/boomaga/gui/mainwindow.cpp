@@ -560,6 +560,16 @@ QMessageBox *MainWindow::showPrintDialog(const QString &text)
 
 
 /************************************************
+ *
+ ************************************************/
+void rotateSheets(QList<Sheet*> &sheets)
+{
+    foreach (Sheet *s, sheets)
+        s->setRotation(s->rotation() + Rotate180);
+}
+
+
+/************************************************
 
  ************************************************/
 bool MainWindow::print(uint count, bool collate)
@@ -583,7 +593,6 @@ bool MainWindow::print(uint count, bool collate)
     saveAuto();
 
     bool res = true;
-    bool showDialog = project->printer()->isShowProgressDialog();
     QMessageBox *infoDialog = 0;
 
     bool split = project->doubleSided() &&
@@ -595,6 +604,8 @@ bool MainWindow::print(uint count, bool collate)
         Project::PagesOrder order_2;
         Project::PagesType  pagesType_1;
         Project::PagesType  pagesType_2;
+        bool rotate_1 = false;
+        bool rotate_2 = false;
 
         if (project->printer()->duplexType() == DuplexManual)
         {
@@ -612,6 +623,9 @@ bool MainWindow::print(uint count, bool collate)
                 pagesType_1 = Project::EvenPages;
                 pagesType_2 = Project::OddPages;
             }
+
+            rotate_1 = isLandscape(project->rotation());
+            rotate_2 = false;
         }
         else
         {
@@ -629,11 +643,19 @@ bool MainWindow::print(uint count, bool collate)
                 pagesType_1 = Project::EvenPages;
                 pagesType_2 = Project::OddPages;
             }
-        }
 
+            rotate_1 = isPortrate(project->rotation());
+            rotate_2 = false;
+        }
 
          keeper.sheets_1 = project->selectSheets(pagesType_1, order_1);
          keeper.sheets_2 = project->selectSheets(pagesType_2, order_2);
+
+         if (rotate_1)
+             rotateSheets(keeper.sheets_1);
+
+         if (rotate_2)
+             rotateSheets(keeper.sheets_2);
 
 
          if (keeper.sheets_1.count())
@@ -650,13 +672,13 @@ bool MainWindow::print(uint count, bool collate)
              }
 
 
-             if (showDialog && !keeper.sheets_2.count())
+             if (!keeper.sheets_2.count())
              {
                  infoDialog = showPrintDialog(tr("Print the all pages on %1.").arg(project->printer()->name()));
              }
 
 
-             res = project->printer()->print(keeper.sheets_1, "", false, count, collate);
+             res = project->printer()->print(keeper.sheets_1, "", project->doubleSided(), count, collate);
              if (!res)
              {
                  delete(infoDialog);
@@ -702,10 +724,9 @@ bool MainWindow::print(uint count, bool collate)
                      keeper.sheets_2.append(new Sheet(1, 0));
              }
 
-             if (showDialog)
-                infoDialog = showPrintDialog(tr("Print the even pages on %1.").arg(project->printer()->name()));
+             infoDialog = showPrintDialog(tr("Print the even pages on %1.").arg(project->printer()->name()));
 
-             res = project->printer()->print(keeper.sheets_2, "", false, count, collate);
+             res = project->printer()->print(keeper.sheets_2, "", project->doubleSided(), count, collate);
              if (!res)
              {
                  delete(infoDialog);
@@ -716,8 +737,7 @@ bool MainWindow::print(uint count, bool collate)
     }
     else //if (split) no
     {
-        if (showDialog)
-            infoDialog = showPrintDialog(tr("Print the all pages on %1.").arg(project->printer()->name()));
+        infoDialog = showPrintDialog(tr("Print the all pages on %1.").arg(project->printer()->name()));
 
         Project::PagesOrder order;
         if (project->printer()->reverseOrder())

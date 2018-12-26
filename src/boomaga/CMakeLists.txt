@@ -26,11 +26,6 @@
 
 cmake_minimum_required(VERSION 3.0.0)
 cmake_policy(SET CMP0028 NEW)
-cmake_policy(SET CMP0028 NEW)
-if (POLICY CMP0071)
-    cmake_policy(SET CMP0071 NEW)
-endif()
-
 
 project(boomagaGui)
 
@@ -39,7 +34,8 @@ set(HEADERS
     dbus.h
     render.h
     settings.h
-    application.h
+    finddbusaddress.h
+    ../common.h
 
     kernel/sheet.h
     kernel/inputfile.h
@@ -51,7 +47,7 @@ set(HEADERS
     kernel/projectpage.h
     kernel/printer.h
     kernel/cupsprinteroptions.h
-
+        
     gui/mainwindow.h
     gui/actions.h
     gui/icon.h
@@ -66,11 +62,11 @@ set(HEADERS
     gui/widgets/printerscombobox.h
     gui/widgets/previewwidget.h
     gui/widgets/subbookletview.h
-
+    
     translations/translatorsinfo/translatorsinfo.h
 
     pdfmerger/pdfmergeripc.h
-
+    
     pdfparser/pdferrors.h
     pdfparser/pdfxref.h
     pdfparser/pdfvalue.h
@@ -84,7 +80,8 @@ set(SOURCES
     dbus.cpp
     render.cpp
     settings.cpp
-    application.cpp
+    finddbusaddress.cpp
+    ../common.cpp
 
     kernel/sheet.cpp
     kernel/inputfile.cpp
@@ -96,7 +93,7 @@ set(SOURCES
     kernel/cupsprinteroptions.cpp
     kernel/printer.cpp
     kernel/projectfile.cpp
-
+    
     gui/mainwindow.cpp
     gui/actions.cpp
     gui/icon.cpp
@@ -111,18 +108,30 @@ set(SOURCES
     gui/widgets/printerscombobox.cpp
     gui/widgets/previewwidget.cpp
     gui/widgets/subbookletview.cpp
-
+    
     translations/translatorsinfo/translatorsinfo.cpp
 
     pdfmerger/pdfmergeripc.cpp
-
+    
     pdfparser/pdfxref.cpp
     pdfparser/pdfvalue.cpp
     pdfparser/pdfreader.cpp
     pdfparser/pdfobject.cpp
 )
 
+
 set(LIBRARIES
+)
+
+set(QT_USE_QTDBUS 1)
+
+set(UI_FILES
+    mainwindow.ui
+    printersettings/printersettings.ui
+    aboutdialog/aboutdialog.ui
+    export/exporttopdf.ui
+    configdialog/configdialog.ui
+    printdialog/printdialog.ui
 )
 
 # QRC files .................
@@ -156,15 +165,9 @@ find_package(Qt5 REQUIRED
     Core
     Widgets
     PrintSupport
+    DBus
     LinguistTools
 )
-
-
-if (BACKEND_TYPE STREQUAL "DBUS")
-    find_package(Qt5 REQUIRED DBus)
-    set(LIBRARIES ${LIBRARIES} Qt5::DBus)
-endif()
-
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -194,11 +197,12 @@ qt5_add_resources(  QRC_SOURCES ${RESOURCES})
 qt5_add_translation(QM_FILES    ${TS_FILES})
 
 
-add_executable(boomaga ${HEADERS} ${SOURCES} ${QM_FILES} ${QRC_SOURCES} ${TRANSLATORS_INFO_QRC})
-target_link_libraries(boomaga ${LIBRARIES} Qt5::Widgets Qt5::PrintSupport )
+add_executable(${INSTANCE_NAME} ${HEADERS} ${SOURCES} ${QM_FILES} ${QRC_SOURCES} ${TRANSLATORS_INFO_QRC})
+target_link_libraries(${INSTANCE_NAME} ${LIBRARIES} Qt5::Widgets Qt5::PrintSupport Qt5::DBus)
 
 
-
+install(TARGETS ${INSTANCE_NAME} RUNTIME DESTINATION ${GUI_DIR})
+install(FILES ${QM_FILES} DESTINATION ${TRANSLATIONS_DIR})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/org.boomaga.service
                ${CMAKE_CURRENT_BINARY_DIR}/org.boomaga.service
@@ -206,41 +210,21 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/org.boomaga.service
 
 include(cmake/CreateDesktopFile.cmake)
 CREATE_DESKTOP_FILE(misc/boomaga.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/boomaga.desktop translations/*.desktop)
-CREATE_PLIST_FILE(misc/Info.plist.in ${CMAKE_CURRENT_BINARY_DIR}/Info.plist)
 
-if (BACKEND_TYPE STREQUAL "DBUS")
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.boomaga.service DESTINATION ${DBUS_SERVICE_DIR})
-endif()
-
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Linux"    OR 
-    ${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD" )
-
-    install(TARGETS boomaga RUNTIME DESTINATION ${GUI_DIR})
-    install(FILES ${QM_FILES} DESTINATION ${TRANSLATIONS_DIR})
-
-    install(FILES   misc/images/mainicon/boomaga-16x16.png   DESTINATION "share/icons/hicolor/16x16/apps"   RENAME "boomaga.png")
-    install(FILES   misc/images/mainicon/boomaga-32x32.png   DESTINATION "share/icons/hicolor/32x32/apps"   RENAME "boomaga.png")
-    install(FILES   misc/images/mainicon/boomaga-48x48.png   DESTINATION "share/icons/hicolor/48x48/apps"   RENAME "boomaga.png")
-    install(FILES   misc/images/mainicon/boomaga-64x64.png   DESTINATION "share/icons/hicolor/64x64/apps"   RENAME "boomaga.png")
-    install(FILES   misc/images/mainicon/boomaga-128x128.png DESTINATION "share/icons/hicolor/128x128/apps" RENAME "boomaga.png")
-    install(FILES   misc/images/mainicon/boomaga-256x256.png DESTINATION "share/icons/hicolor/256x256/apps" RENAME "boomaga.png")
-    install(FILES   misc/images/mainicon/boomaga-512x512.png DESTINATION "share/icons/hicolor/512x512/apps" RENAME "boomaga.png")
-
-    install(FILES   ${CMAKE_CURRENT_BINARY_DIR}/boomaga.desktop DESTINATION "share/applications")
-    install(FILES   misc/boomaga.xml        DESTINATION "share/mime/packages")
-
-    install(FILES   misc/boomaga.1.gz       DESTINATION share/man/man1)
-
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    install(TARGETS boomaga   RUNTIME DESTINATION Applications/Boomaga.app/Contents/MacOS)
-    install(FILES ${QM_FILES}         DESTINATION Applications/Boomaga.app/Contents/Resources)
-
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION Applications/Boomaga.app/Contents)
-    install(FILES misc/images/mainicon/Boomaga.icns      DESTINATION Applications/Boomaga.app/Contents/Resources)
-    install(FILES misc/boomaga.1.gz                      DESTINATION Applications/Boomaga.app/Contents/Resources)
-endif()
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/org.boomaga.service DESTINATION ${DBUS_SERVICE_DIR})
 
 
+install(FILES   misc/images/mainicon/boomaga-16x16.png   DESTINATION "share/icons/hicolor/16x16/apps"   RENAME "boomaga.png")
+install(FILES   misc/images/mainicon/boomaga-32x32.png   DESTINATION "share/icons/hicolor/32x32/apps"   RENAME "boomaga.png")
+install(FILES   misc/images/mainicon/boomaga-48x48.png   DESTINATION "share/icons/hicolor/48x48/apps"   RENAME "boomaga.png")
+install(FILES   misc/images/mainicon/boomaga-64x64.png   DESTINATION "share/icons/hicolor/64x64/apps"   RENAME "boomaga.png")
+install(FILES   misc/images/mainicon/boomaga-128x128.png DESTINATION "share/icons/hicolor/128x128/apps" RENAME "boomaga.png")
+install(FILES   misc/images/mainicon/boomaga-256x256.png DESTINATION "share/icons/hicolor/256x256/apps" RENAME "boomaga.png")
+install(FILES   misc/images/mainicon/boomaga-512x512.png DESTINATION "share/icons/hicolor/512x512/apps" RENAME "boomaga.png")
+
+install(FILES   ${CMAKE_CURRENT_BINARY_DIR}/boomaga.desktop DESTINATION "share/applications")
+install(FILES   misc/boomaga.xml        DESTINATION "share/mime/packages")
+install(FILES   misc/boomaga.1.gz       DESTINATION share/man/man1)
 
 add_subdirectory(pdfmerger)
 

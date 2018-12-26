@@ -26,14 +26,11 @@
 
 cmake_minimum_required(VERSION 3.0.0)
 cmake_policy(SET CMP0028 NEW)
-if (POLICY CMP0071)
-    cmake_policy(SET CMP0071 NEW)
-endif()
 
 project(boomaga)
 
 set(MAJOR_VERSION 1)
-set(MINOR_VERSION 2)
+set(MINOR_VERSION 3)
 set(PATCH_VERSION 0)
 set(FULL_VERSION ${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION})
 
@@ -49,10 +46,13 @@ status_message("boomaga ver. ${FULL_VERSION}")
 status_message(" ")
 
 
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
 find_program(CUPS_CONFIG_EXECUTABLE NAMES cups-config)
 if(CUPS_CONFIG_EXECUTABLE)
     exec_program(${CUPS_CONFIG_EXECUTABLE} ARGS --serverbin OUTPUT_VARIABLE CUPS_SERVERBIN)
     set(DEF_CUPS_BACKEND_DIR "${CUPS_SERVERBIN}/backend")
+    set(DEF_CUPS_FILTER_DIR  "${CUPS_SERVERBIN}/filter")
 else(CUPS_CONFIG_EXECUTABLE)
     message(FATAL_ERROR "Can't find cups-config. Are CUPS development packages installed?")
 endif(CUPS_CONFIG_EXECUTABLE)
@@ -60,8 +60,6 @@ endif(CUPS_CONFIG_EXECUTABLE)
 # Linux ***************************************
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 
-  set(BACKEND_TYPE DBUS)
-  add_definitions(-DBACKEND_TYPE_DBUS=1)
   set(DEF_CUPS_PPD_DIR /usr/share/ppd/boomaga)
   set(DEF_DBUS_MACINE_ID_DIR /var/lib/dbus)
   set(DEF_DBUS_SERVICE_DIR ${CMAKE_INSTALL_PREFIX}/share/dbus-1/services)
@@ -69,64 +67,56 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 # FreeBSD *************************************
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
 
-  set(BACKEND_TYPE DBUS)
-  add_definitions(-DBACKEND_TYPE_DBUS=1)
   set(DEF_CUPS_PPD_DIR /usr/local/share/cups/model)
   set(DEF_DBUS_MACINE_ID_DIR /var/db/dbus)
   set(DEF_DBUS_SERVICE_DIR ${CMAKE_INSTALL_PREFIX}/share/dbus-1/services)
 
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-  
-  set(BACKEND_TYPE MACOS)
-  add_definitions(-DBACKEND_TYPE_MACOS=1)
-
-  set(MAC_APP_ID    "io.github.Boomaga")
-  set(MAC_SPOOL_DIR "/var/spool/${MAC_APP_ID}")
 endif()
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-
-  set(GUI_DIR    ${CMAKE_INSTALL_PREFIX}/Applications/Boomaga.app/Contents/MacOS)
-  set(NONGUI_DIR ${CMAKE_INSTALL_PREFIX}/Applications/Boomaga.app/Contents/MacOS)
-else()
-  
-  set(GUI_DIR    ${CMAKE_INSTALL_PREFIX}/bin)
-  set(NONGUI_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/boomaga)
-endif()
-
+set(GUI_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 add_definitions(-DGUI_DIR=\"${GUI_DIR}\")
+
+set(NONGUI_DIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/boomaga)
 add_definitions(-DNONGUI_DIR=\"${NONGUI_DIR}\")
 
 ###########################################################
 
-setFirstUpper(CUPS_BACKEND_NAME "boomaga")
+setByDefault(INSTANCE_NAME      "boomaga")
+setFirstUpper(CUPS_BACKEND_NAME "${INSTANCE_NAME}")
 
-setByDefault(CUPS_BACKEND_URI   "boomaga:/")
+setByDefault(CUPS_BACKEND_URI   "${INSTANCE_NAME}:/")
 setByDefault(CUPS_BACKEND_INFO  "${CUPS_BACKEND_NAME}")
 setByDefault(CUPS_BACKEND_MODEL "${CUPS_BACKEND_NAME} printer")
-setByDefault(CUPS_BACKEND_DESCRIPTION  "Virtual boomaga printer")
+setByDefault(CUPS_BACKEND_DESCRIPTION  "Virtual ${INSTANCE_NAME} printer")
 setByDefault(CUPS_BACKEND_MANUFACTURER "Generic")
 
-setByDefault(GUI_PROGRAM    ${GUI_DIR}/boomaga)
-setByDefault(GUI_SHARE_DIR  ${CMAKE_INSTALL_PREFIX}/share/boomaga)
+setByDefault(GUI_PROGRAM    ${GUI_DIR}/${INSTANCE_NAME})
+setByDefault(GUI_SHARE_DIR  ${CMAKE_INSTALL_PREFIX}/share/${INSTANCE_NAME})
 
 setByDefault(CUPS_BACKEND_DIR   "${DEF_CUPS_BACKEND_DIR}")
+setByDefault(CUPS_FILTER_DIR    "${DEF_CUPS_FILTER_DIR}")
 setByDefault(CUPS_PPD_DIR       "${DEF_CUPS_PPD_DIR}")
-if (BACKEND_TYPE STREQUAL "DBUS")
-  setByDefault(DBUS_MACINE_ID_DIR "${DEF_DBUS_MACINE_ID_DIR}")
-  setByDefault(DBUS_SERVICE_DIR   "${DEF_DBUS_SERVICE_DIR}")
-endif()
+setByDefault(DBUS_MACINE_ID_DIR "${DEF_DBUS_MACINE_ID_DIR}")
+setByDefault(DBUS_SERVICE_DIR   "${DEF_DBUS_SERVICE_DIR}")
+
 
 status_message(" ")
 status_message("You can change the following directories using cmake options like:")
 status_message("-DCUPS_PPD_DIR=your_path")
 status_message(" ")
 status_message("  CUPS_BACKEND_DIR     =  ${CUPS_BACKEND_DIR}")
+status_message("  CUPS_FILTER_DIR      =  ${CUPS_FILTER_DIR}")
 status_message("  CUPS_PPD_DIR         =  ${CUPS_PPD_DIR}")
-if (BACKEND_TYPE STREQUAL "DBUS")
-  status_message("  DBUS_MACINE_ID_DIR   =  ${DBUS_MACINE_ID_DIR}")
-  status_message("  DBUS_SERVICE_DIR     =  ${DBUS_SERVICE_DIR}")
-endif()
+status_message("  DBUS_MACINE_ID_DIR   =  ${DBUS_MACINE_ID_DIR}")
+status_message("  DBUS_SERVICE_DIR     =  ${DBUS_SERVICE_DIR}")
+status_message(" ")
+status_message(" You can change the following options using cmake options:")
+status_message("  INSTANCE_NAME        =  ${INSTANCE_NAME}")
+status_message("  CUPS_BACKEND_URI     =  ${CUPS_BACKEND_URI}")
+status_message("  CUPS_BACKEND_INFO    =  ${CUPS_BACKEND_INFO}")
+status_message("  CUPS_BACKEND_MODEL   =  ${CUPS_BACKEND_MODEL}")
+status_message("  CUPS_BACKEND_DESCRIPTION  = ${CUPS_BACKEND_DESCRIPTION}")
+status_message("  CUPS_BACKEND_MANUFACTURER = ${CUPS_BACKEND_MANUFACTURER}")
 status_message(" ")
 
 add_subdirectory(src/backend)
